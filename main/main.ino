@@ -5,11 +5,16 @@
 #include <Arduino.h>
 #include <PS2KeyRaw.h>
 
+const uint8_t PIN_MSE_DAT = 15;
+const uint8_t PIN_MSE_CLK = 16;
+const uint8_t PIN_KBD_DAT = 17;
+const uint8_t PIN_KBD_CLK = 18;
+
 const TickType_t delay_tick = 10;
 
 constexpr uint8_t CORE_TASK_BLE{0};
 
-static PS2Mouse mouse(16, 15, STREAM);
+static PS2Mouse mouse(PIN_MSE_CLK, PIN_MSE_DAT, STREAM);
 static PS2KeyRaw keyboard;
 static TaskHandle_t task_handle_ble;
 static MsgPipe<hidmsg_t> hid_msg_pipe;
@@ -66,7 +71,7 @@ void setup(void)
 #endif
 	DEBUG_PRINTF("Start\n");
 	mouse.initialize();
-	keyboard.begin(17, 18);
+	keyboard.begin(PIN_KBD_DAT, PIN_KBD_CLK);
 
 	xTaskCreatePinnedToCore(BLETask,          // Function to implement the task
 							"BLETask",        // Name of the task
