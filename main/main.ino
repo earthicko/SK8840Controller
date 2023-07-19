@@ -1,9 +1,15 @@
 #include "BLEComboParser.hpp"
 #include "DebugPrint.h"
 #include "MsgPipe.hpp"
+#include "PS2CodeManager.hpp"
 #include "PS2Mouse.hpp"
 #include <Arduino.h>
 #include <PS2KeyRaw.h>
+
+const int MOUSE_MASK_LEFT = 0x01;
+const int MOUSE_MASK_RIGHT = 0x02;
+const int MOUSE_MASK_WHEEL = 0x04;
+const int MOUSE_MASK_ALL = MOUSE_MASK_LEFT | MOUSE_MASK_RIGHT | MOUSE_MASK_WHEEL;
 
 const uint8_t PIN_MSE_DAT = 15;
 const uint8_t PIN_MSE_CLK = 16;
@@ -66,6 +72,7 @@ void BLETask(void *parameter)
 
 void setup(void)
 {
+	PS2CodeManager::initialize();
 #ifdef _DEBUG
 	Serial.begin(115200);
 #endif
@@ -82,37 +89,68 @@ void setup(void)
 							CORE_TASK_BLE);   // Core where the task should run
 }
 
-void loop(void)
+void handleMouse(void)
 {
 	static int16_t data_prev[3];
 	int16_t data[3];
 
 	mouse.report(data);
+	data[0] &= MOUSE_MASK_ALL;
 
 	if (!(data[0] == data_prev[0] && data[1] == data_prev[1] && data[2] == data_prev[2]))
 	{
-		const int MOUSE_MASK_LEFT = 0x01;
-		const int MOUSE_MASK_RIGHT = 0x02;
-		const int MOUSE_MASK_WHEEL = 0x04;
 		hidmsg_t msg;
 
+#ifdef _DEBUG
 		char left_stat = data[0] & MOUSE_MASK_LEFT ? 'o' : '-';
 		char right_stat = data[0] & MOUSE_MASK_RIGHT ? 'o' : '-';
 		char wheel_stat = data[0] & MOUSE_MASK_WHEEL ? 'o' : '-';
-		DEBUG_PRINTF("%c %c %c | (%d, %d)\n",
-					 left_stat,
-					 right_stat,
-					 wheel_stat,
-					 data[1],
+		DEBUG_PRINTF("%c %c %c | (%d, %d)\n", left_stat, right_stat, wheel_stat, data[1],
 					 data[2]); // Stat, X, Y
-		data_prev[0] = data[0];
-		data_prev[1] = data[1];
-		data_prev[2] = data[2];
-	}
+		DEBUG_PRINTF("data = {%d, %d, %d}\n", data[0], data[1], data[2]);
+#endif
 
-	if (keyboard.available())
-	{
-		int c = keyboard.read();
-		DEBUG_PRINTF("Key: %X\n", c);
+		msg.ep = 2;
+		msg.len = 5;
+		msg.buf[0] = 1;
+		msg.buf[1] = (uint8_t)(data[0]);
+		msg.buf[2] = (uint8_t)(data[1]);
+		msg.buf[3] = -(uint8_t)(data[2]);
+		msg.buf[4] = 0;
+
+		hid_msg_pipe.push(&msg);
+
+		memcpy(data_prev, data, sizeof(data_prev));
 	}
+}
+
+void handleKeyboard(void)
+{
+	if (keyboard.available() == 0)
+		return;
+
+	uint8_t c = keyboard.read();
+	DEBUG_PRINTF("Received keycode %X\n", c);
+
+	uint8_t keycode;
+	uint8_t updown;
+	if (PS2CodeManager::parse(c, &keycode, &updown))
+	{
+		DEBUG_PRINTF("Parsed USB keycode %X, ", keycode);
+		switch (updown)
+		{
+		case PS2CodeManager::BREAK:
+			DEBUG_PRINTF("BREAK\n");
+			break;
+		case PS2CodeManager::MAKE:
+			DEBUG_PRINTF("MAKE\n");
+			break;
+		}
+	}
+}
+
+void loop(void)
+{
+	handleMouse();
+	handleKeyboard();
 }
