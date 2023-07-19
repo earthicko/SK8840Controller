@@ -156,10 +156,8 @@ bool PS2CodeManager::parsePauseBreakMake(uint8_t ps2_code, uint8_t *ret_code, ui
 	{
 		DEBUG_PRINTF("Unimplemented stub of %s\n", __func__);
 		_state = INIT;
-		*ret_code = 0x00;
-		*ret_updown = MAKE;
 	}
-	return (true);
+	return (false);
 }
 
 bool PS2CodeManager::parseExtendedBreak(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
@@ -184,10 +182,8 @@ bool PS2CodeManager::parsePrtScMake(uint8_t ps2_code, uint8_t *ret_code, uint8_t
 	{
 		DEBUG_PRINTF("Unimplemented stub of %s\n", __func__);
 		_state = INIT;
-		*ret_code = 0x00;
-		*ret_updown = MAKE;
 	}
-	return (true);
+	return (false);
 }
 
 bool PS2CodeManager::parsePrtScBreak(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
@@ -196,10 +192,8 @@ bool PS2CodeManager::parsePrtScBreak(uint8_t ps2_code, uint8_t *ret_code, uint8_
 	{
 		DEBUG_PRINTF("Unimplemented stub of %s\n", __func__);
 		_state = INIT;
-		*ret_code = 0x00;
-		*ret_updown = MAKE;
 	}
-	return (true);
+	return (false);
 }
 
 bool PS2CodeManager::parse(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
