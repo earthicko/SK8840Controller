@@ -4,5 +4,5 @@
     "board": "esp32:esp32:esp32s3",
     "port": "/dev/tty.wchusbserial54CE0263451",
     "programmer": "esptool",
-    "output": "../ArduinoOutput"
+    "output": "build"
 }
