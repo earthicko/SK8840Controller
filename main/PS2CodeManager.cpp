@@ -205,7 +205,7 @@ bool PS2CodeManager::parsePrtScBreak(uint8_t ps2_code, uint8_t *ret_code, uint8_
 bool PS2CodeManager::parse(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
 {
 	static unsigned long prev_call_time;
-	static const unsigned long reset_time = 10;
+	static const unsigned long reset_time = 100;
 
 	if (millis() - prev_call_time > reset_time)
 	{
