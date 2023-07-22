@@ -6,9 +6,9 @@
 bool USBHIDMsgManager::_ispressed[USBCODE_LEN];
 hidmsg_t USBHIDMsgManager::msg;
 
-void USBHIDMsgManager::update(uint8_t keycode, bool pressed)
+void USBHIDMsgManager::update(uint8_t keycode, bool pressed, bool is_modkey)
 {
-	keycode = remapKeycode(keycode);
+	keycode = remapKeycode(keycode, is_modkey);
 
 	if ((_ispressed[keycode] && pressed) || (!_ispressed[keycode] && !pressed))
 	{
@@ -31,9 +31,7 @@ void USBHIDMsgManager::update(uint8_t keycode, bool pressed)
 	msg.ep = 1;
 	msg.len = 8;
 
-	if (keycode == KEY_MOD_LCTRL || keycode == KEY_MOD_LSHIFT || keycode == KEY_MOD_LALT
-		|| keycode == KEY_MOD_LMETA || keycode == KEY_MOD_RCTRL || keycode == KEY_MOD_RSHIFT
-		|| keycode == KEY_MOD_RALT || keycode == KEY_MOD_RMETA)
+	if (is_modkey)
 	{
 		if (pressed)
 			msg.buf[0] |= keycode;

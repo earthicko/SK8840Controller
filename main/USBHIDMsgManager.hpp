@@ -13,7 +13,7 @@ class USBHIDMsgManager
 
   public:
 	static hidmsg_t msg;
-	static void update(uint8_t keycode, bool pressed);
+	static void update(uint8_t keycode, bool pressed, bool is_modkey);
 };
 
 #endif

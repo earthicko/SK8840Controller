@@ -161,7 +161,7 @@ void handleKeyboard(void)
 			break;
 		}
 
-		USBHIDMsgManager::update(usb_hid_event.code, pressed);
+		USBHIDMsgManager::update(usb_hid_event.code, pressed, usb_hid_event.is_modkey);
 
 		hid_msg_pipe.push(USBHIDMsgManager::msg);
 	}
