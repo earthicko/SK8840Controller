@@ -142,14 +142,14 @@ void handleKeyboard(void)
 	uint8_t c = keyboard.read();
 	DEBUG_PRINTF("Received keycode %X\n", c);
 
-	uint8_t keycode;
-	uint8_t updown;
-	if (PS2CodeManager::parse(c, &keycode, &updown))
+	usb_hid_event_t usb_hid_event;
+
+	if (PS2CodeManager::parse(c, usb_hid_event))
 	{
 		bool pressed;
 
-		DEBUG_PRINTF("Parsed USB keycode %X, ", keycode);
-		switch (updown)
+		DEBUG_PRINTF("Parsed USB keycode %X, ", usb_hid_event.code);
+		switch (usb_hid_event.updown)
 		{
 		case PS2CodeManager::BREAK:
 			DEBUG_PRINTF("BREAK\n");
@@ -161,7 +161,7 @@ void handleKeyboard(void)
 			break;
 		}
 
-		USBHIDMsgManager::update(keycode, pressed);
+		USBHIDMsgManager::update(usb_hid_event.code, pressed);
 
 		hid_msg_pipe.push(USBHIDMsgManager::msg);
 	}

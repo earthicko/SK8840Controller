@@ -6,6 +6,7 @@
 
 uint8_t PS2CodeManager::_ps2_to_usb_basic[PS2CODE_LEN];
 uint8_t PS2CodeManager::_ps2_to_usb_extended[PS2CODE_LEN];
+bool PS2CodeManager::_is_ps2_modkey[PS2CODE_LEN];
 int PS2CodeManager::_state;
 uint8_t PS2CodeManager::_prev_code;
 
@@ -16,6 +17,11 @@ void setCode(uint8_t array[], uint8_t value, uint8_t index)
 
 void PS2CodeManager::initialize(void)
 {
+	_is_ps2_modkey[0x11] = true;
+	_is_ps2_modkey[0x12] = true;
+	_is_ps2_modkey[0x14] = true;
+	_is_ps2_modkey[0x59] = true;
+
 	setCode(_ps2_to_usb_basic, KEY_MOD_LCTRL, 0x14);
 	setCode(_ps2_to_usb_basic, KEY_MOD_LSHIFT, 0x12);
 	setCode(_ps2_to_usb_basic, KEY_MOD_LALT, 0x11);
@@ -105,7 +111,7 @@ void PS2CodeManager::initialize(void)
 	setCode(_ps2_to_usb_extended, KEY_MEDIA_MUTE, 0x23);
 }
 
-bool PS2CodeManager::parseInit(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
+bool PS2CodeManager::parseInit(uint8_t ps2_code, usb_hid_event_t &ret_event)
 {
 	switch (ps2_code)
 	{
@@ -123,13 +129,14 @@ bool PS2CodeManager::parseInit(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret
 		return (false);
 	default:
 		_state = INIT;
-		*ret_code = _ps2_to_usb_basic[ps2_code];
-		*ret_updown = MAKE;
+		ret_event.code = _ps2_to_usb_basic[ps2_code];
+		ret_event.updown = MAKE;
+		ret_event.is_modkey = _is_ps2_modkey[ps2_code];
 		return (true);
 	}
 }
 
-bool PS2CodeManager::parseExtended(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
+bool PS2CodeManager::parseExtended(uint8_t ps2_code, usb_hid_event_t &ret_event)
 {
 	switch (ps2_code)
 	{
@@ -143,13 +150,14 @@ bool PS2CodeManager::parseExtended(uint8_t ps2_code, uint8_t *ret_code, uint8_t 
 		return (false);
 	default:
 		_state = INIT;
-		*ret_code = _ps2_to_usb_extended[ps2_code];
-		*ret_updown = MAKE;
+		ret_event.code = _ps2_to_usb_extended[ps2_code];
+		ret_event.updown = MAKE;
+		ret_event.is_modkey = _is_ps2_modkey[ps2_code];
 		return (true);
 	}
 }
 
-bool PS2CodeManager::parsePauseBreakMake(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
+bool PS2CodeManager::parsePauseBreakMake(uint8_t ps2_code, usb_hid_event_t &ret_event)
 {
 	// E1 14 77 E1 F0 14 E0 77
 	static const uint8_t reference[8] = {0xE1, 0x14, 0x77, 0xE1, 0xF0, 0x14, 0xE0, 0x77};
@@ -160,7 +168,7 @@ bool PS2CodeManager::parsePauseBreakMake(uint8_t ps2_code, uint8_t *ret_code, ui
 	return (false);
 }
 
-bool PS2CodeManager::parseExtendedBreak(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
+bool PS2CodeManager::parseExtendedBreak(uint8_t ps2_code, usb_hid_event_t &ret_event)
 {
 	switch (ps2_code)
 	{
@@ -170,13 +178,14 @@ bool PS2CodeManager::parseExtendedBreak(uint8_t ps2_code, uint8_t *ret_code, uin
 		return (false);
 	default:
 		_state = INIT;
-		*ret_code = _ps2_to_usb_extended[ps2_code];
-		*ret_updown = BREAK;
+		ret_event.code = _ps2_to_usb_extended[ps2_code];
+		ret_event.updown = BREAK;
+		ret_event.is_modkey = _is_ps2_modkey[ps2_code];
 		return (true);
 	}
 }
 
-bool PS2CodeManager::parsePrtScMake(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
+bool PS2CodeManager::parsePrtScMake(uint8_t ps2_code, usb_hid_event_t &ret_event)
 {
 	static const uint8_t reference[4] = {0xE0, 0x12, 0xE0, 0x7C};
 	{
@@ -186,7 +195,7 @@ bool PS2CodeManager::parsePrtScMake(uint8_t ps2_code, uint8_t *ret_code, uint8_t
 	return (false);
 }
 
-bool PS2CodeManager::parsePrtScBreak(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
+bool PS2CodeManager::parsePrtScBreak(uint8_t ps2_code, usb_hid_event_t &ret_event)
 {
 	static const uint8_t reference[6] = {0xE0, 0xF0, 0x7C, 0xE0, 0xF0, 0x12};
 	{
@@ -196,7 +205,7 @@ bool PS2CodeManager::parsePrtScBreak(uint8_t ps2_code, uint8_t *ret_code, uint8_
 	return (false);
 }
 
-bool PS2CodeManager::parse(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_updown)
+bool PS2CodeManager::parse(uint8_t ps2_code, usb_hid_event_t &ret_event)
 {
 	static unsigned long prev_call_time;
 	static const unsigned long reset_time = 100;
@@ -212,22 +221,23 @@ bool PS2CodeManager::parse(uint8_t ps2_code, uint8_t *ret_code, uint8_t *ret_upd
 	switch (_state)
 	{
 	case INIT:
-		return (parseInit(ps2_code, ret_code, ret_updown));
+		return (parseInit(ps2_code, ret_event));
 	case EXPECT_BASIC_BREAK:
 		_state = INIT;
-		*ret_code = _ps2_to_usb_basic[ps2_code];
-		*ret_updown = BREAK;
+		ret_event.code = _ps2_to_usb_basic[ps2_code];
+		ret_event.updown = BREAK;
+		ret_event.is_modkey = _is_ps2_modkey[ps2_code];
 		return (true);
 	case EXPECT_EXTENDED:
-		return (parseExtended(ps2_code, ret_code, ret_updown));
+		return (parseExtended(ps2_code, ret_event));
 	case EXPECT_PAUSEBREAK_MAKE:
-		return (parsePauseBreakMake(ps2_code, ret_code, ret_updown));
+		return (parsePauseBreakMake(ps2_code, ret_event));
 	case EXPECT_EXTENDED_BREAK:
-		return (parseExtendedBreak(ps2_code, ret_code, ret_updown));
+		return (parseExtendedBreak(ps2_code, ret_event));
 	case EXPECT_PRTSC_MAKE:
-		return (parsePrtScMake(ps2_code, ret_code, ret_updown));
+		return (parsePrtScMake(ps2_code, ret_event));
 	case EXPECT_PRTSC_BREAK:
-		return (parsePrtScBreak(ps2_code, ret_code, ret_updown));
+		return (parsePrtScBreak(ps2_code, ret_event));
 	default:
 		DEBUG_PRINTF("Error: undefined PS/2 parser state\n");
 		return (false);
