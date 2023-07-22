@@ -108,7 +108,11 @@ void handleMouse(void)
 		char left_stat = data[0] & MOUSE_MASK_LEFT ? 'o' : '-';
 		char right_stat = data[0] & MOUSE_MASK_RIGHT ? 'o' : '-';
 		char wheel_stat = data[0] & MOUSE_MASK_WHEEL ? 'o' : '-';
-		DEBUG_PRINTF("%c %c %c | (%d, %d)\n", left_stat, right_stat, wheel_stat, data[1],
+		DEBUG_PRINTF("%c %c %c | (%d, %d)\n",
+					 left_stat,
+					 right_stat,
+					 wheel_stat,
+					 data[1],
 					 data[2]); // Stat, X, Y
 		DEBUG_PRINTF("data = {%d, %d, %d}\n", data[0], data[1], data[2]);
 #endif
