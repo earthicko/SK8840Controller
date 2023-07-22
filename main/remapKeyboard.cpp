@@ -272,12 +272,16 @@ static uint8_t keycodeMap[256] = {
 	0xff,                 // 0xff 0xff
 };
 
-uint8_t remapKeycode(uint8_t keycode)
+uint8_t remapKeycode(uint8_t keycode, bool is_modkey)
 {
-	for (uint8_t i = 0; i < 8; i++)
+	if (is_modkey)
 	{
-		if (keycodeMapModifier[i][0] == keycode)
-			return (keycodeMapModifier[i][1]);
+		for (uint8_t i = 0; i < 8; i++)
+		{
+			if (keycodeMapModifier[i][0] == keycode)
+				return (keycodeMapModifier[i][1]);
+		}
 	}
-	return (keycodeMap[keycode]);
+	else
+		return (keycodeMap[keycode]);
 }

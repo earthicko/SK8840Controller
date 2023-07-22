@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-uint8_t remapKeycode(uint8_t keycode);
+uint8_t remapKeycode(uint8_t keycode, bool is_modkey);
 
 #endif
