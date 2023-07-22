@@ -14,10 +14,10 @@ const int MOUSE_MASK_RIGHT = 0x02;
 const int MOUSE_MASK_WHEEL = 0x04;
 const int MOUSE_MASK_ALL = MOUSE_MASK_LEFT | MOUSE_MASK_RIGHT | MOUSE_MASK_WHEEL;
 
-const uint8_t PIN_MSE_DAT = 15;
-const uint8_t PIN_MSE_CLK = 16;
-const uint8_t PIN_KBD_DAT = 17;
-const uint8_t PIN_KBD_CLK = 18;
+const uint8_t PIN_MSE_DAT = 32;
+const uint8_t PIN_MSE_CLK = 33;
+const uint8_t PIN_KBD_DAT = 25;
+const uint8_t PIN_KBD_CLK = 26;
 
 const TickType_t delay_tick = 10;
 
