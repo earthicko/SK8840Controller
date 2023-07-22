@@ -1,12 +1,15 @@
 #include "USBHIDMsgManager.hpp"
 #include "DebugPrint.h"
 #include "USBHIDKeys.h"
+#include "remapKeyboard.h"
 
 bool USBHIDMsgManager::_ispressed[USBCODE_LEN];
 hidmsg_t USBHIDMsgManager::msg;
 
 void USBHIDMsgManager::update(uint8_t keycode, bool pressed)
 {
+	keycode = remapKeycode(keycode);
+
 	if ((_ispressed[keycode] && pressed) || (!_ispressed[keycode] && !pressed))
 	{
 #ifdef _DEBUG
