@@ -38,7 +38,7 @@ class MsgPipe
 	{
 		delete[] _msg;
 	}
-	int push(const MSG *input)
+	int push(const MSG &input)
 	{
 		if (xSemaphoreTake(_lock, portMAX_DELAY) != pdTRUE)
 		{
@@ -51,12 +51,12 @@ class MsgPipe
 			xSemaphoreGive(_lock);
 			return (1);
 		}
-		_msg[(_tail + _len) % (_cap + 1)] = *input;
+		_msg[(_tail + _len) % (_cap + 1)] = input;
 		_len = _len + 1;
 		xSemaphoreGive(_lock);
 		return (0);
 	}
-	int pop(MSG *returnBuf)
+	int pop(MSG &returnBuf)
 	{
 		if (xSemaphoreTake(_lock, portMAX_DELAY) != pdTRUE)
 		{
@@ -68,7 +68,7 @@ class MsgPipe
 			xSemaphoreGive(_lock);
 			return (1);
 		}
-		*returnBuf = _msg[_tail];
+		returnBuf = _msg[_tail];
 		_tail = (_tail + 1) % (_cap + 1);
 		_len = _len - 1;
 		xSemaphoreGive(_lock);

@@ -59,7 +59,7 @@ void BLETask(void *parameter)
 			}
 		}
 		hidmsg_t msg;
-		if (hid_msg_pipe.pop(&msg))
+		if (hid_msg_pipe.pop(msg))
 		{
 			vTaskDelay(delay_tick);
 			continue;
@@ -125,7 +125,7 @@ void handleMouse(void)
 		msg.buf[3] = -(uint8_t)(data[2]);
 		msg.buf[4] = 0;
 
-		hid_msg_pipe.push(&msg);
+		hid_msg_pipe.push(msg);
 
 		memcpy(data_prev, data, sizeof(data_prev));
 	}
@@ -160,7 +160,7 @@ void handleKeyboard(void)
 
 		USBHIDMsgManager::update(keycode, pressed);
 
-		hid_msg_pipe.push(&USBHIDMsgManager::msg);
+		hid_msg_pipe.push(USBHIDMsgManager::msg);
 	}
 }
 
