@@ -1,7 +1,8 @@
 #ifndef REMAPKEYBOARD_H
 #define REMAPKEYBOARD_H
 
-extern unsigned char keycodeMapModifier[8][2];
-extern unsigned char keycodeMap[256];
+#include <stdint.h>
+
+uint8_t remapKeycode(uint8_t keycode);
 
 #endif

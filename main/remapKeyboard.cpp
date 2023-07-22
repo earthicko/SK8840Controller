@@ -1,6 +1,7 @@
+#include "remapKeyboard.h"
 #include "USBHIDKeys.h"
 
-unsigned char keycodeMapModifier[8][2] = {
+static uint8_t keycodeMapModifier[8][2] = {
 	{KEY_MOD_LCTRL, KEY_MOD_LCTRL},
 	{KEY_MOD_LSHIFT, KEY_MOD_LSHIFT},
 	{KEY_MOD_LALT, KEY_MOD_LMETA},
@@ -11,7 +12,7 @@ unsigned char keycodeMapModifier[8][2] = {
 	{KEY_MOD_RMETA, KEY_MOD_RMETA},
 };
 
-unsigned char keycodeMap[256] = {
+static uint8_t keycodeMap[256] = {
 	KEY_NONE,             // 0x00 No key pressed
 	KEY_ERR_OVF,          // 0x01  Keyboard Error Roll Over - used for all slots if too
 						  // many keys are pressed ("Phantom key")
@@ -270,3 +271,13 @@ unsigned char keycodeMap[256] = {
 	0xfe,                 // 0xfe 0xfe
 	0xff,                 // 0xff 0xff
 };
+
+uint8_t remapKeycode(uint8_t keycode)
+{
+	for (uint8_t i = 0; i < 8; i++)
+	{
+		if (keycodeMapModifier[i][0] == keycode)
+			return (keycodeMapModifier[i][1]);
+	}
+	return (keycodeMap[keycode]);
+}
