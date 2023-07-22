@@ -102,6 +102,9 @@ void handleMouse(void)
 
 	if (!(data[0] == data_prev[0] && data[1] == data_prev[1] && data[2] == data_prev[2]))
 	{
+		if (data[0] == data_prev[0] && data[1] == 0 && data[2] == 0)
+			return;
+
 		hidmsg_t msg;
 
 #ifdef _DEBUG
