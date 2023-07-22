@@ -106,9 +106,9 @@ void PS2CodeManager::initialize(void)
 	setCode(_ps2_to_usb_extended, KEY_F13, 0x3D);
 	setCode(_ps2_to_usb_extended, KEY_HANGEUL, 0x11);
 	setCode(_ps2_to_usb_extended, KEY_HANJA, 0x14);
-	setCode(_ps2_to_usb_extended, KEY_MEDIA_VOLUMEUP, 0x32);
-	setCode(_ps2_to_usb_extended, KEY_MEDIA_VOLUMEDOWN, 0x21);
-	setCode(_ps2_to_usb_extended, KEY_MEDIA_MUTE, 0x23);
+	setCode(_ps2_to_usb_extended, KEY_VOLUMEUP, 0x32);
+	setCode(_ps2_to_usb_extended, KEY_VOLUMEDOWN, 0x21);
+	setCode(_ps2_to_usb_extended, KEY_MUTE, 0x23);
 }
 
 bool PS2CodeManager::parseInit(uint8_t ps2_code, usb_hid_event_t &ret_event)
